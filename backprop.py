@@ -1,1 +1,80 @@
-import numpy as npfrom sys import stdoutclass Backprop:    def __init__(self, n, h, m):        self.wih = np.random.randn(n+1, h)        self.who = np.random.randn(h+1, m)    def train(self, inputs, targets, niter=1000, eta=0.05, report=100):        for i in range(niter):            # Sum squared error            sse = 0            for ai, t in zip(inputs, targets):                hnet = np.dot(np.append(ai, 1), self.wih)                ah   = Backprop._f(hnet)                onet = np.dot(np.append(ah, 1), self.who)                ao   = Backprop._f(onet)                eo = t - ao                do = eo * Backprop._df(ao)                # This is back-prop!                eh = np.dot(do, self.who.T)[:-1]                dh = eh * Backprop._df(ah)                # Delta rule: adjust weights in proportion to error                self.wih += eta * np.outer(np.append(ai, 1), dh)                self.who += eta * np.outer(np.append(ah, 1), do)                # Accumulate sum squared error                sse += np.sum(eo**2)            # Report periodically            if i%report == 0:                # Compute RMS error as square root of sum squared error, after dividing by                # number of patterns times number of outputs                print(i, "/", niter, " RMS:", np.sqrt(sse/(len(inputs)*self.who.shape[1])))                # Force immediate print                stdout.flush()    def test(self, inputs):        output = np.zeros((len(inputs), self.who.shape[1]))        counter = 0        for ai in inputs:            hnet = np.dot(np.append(ai, 1), self.wih)            ah   = Backprop._f(hnet)            onet = np.dot(np.append(ah, 1), self.who)            ao   = Backprop._f(onet)            output[counter] = ao            counter += 1        return output    def _f(x):        return 1 / (1 + np.exp(-x))    def _df(x):        return x * (1 - x)
+# Shmulik Edelman, shmulike@post.bgu.ac.il
+
+# n     - Number of inputs
+# m     - Number of outputs
+# niter - Number of iterations, default = 1000
+# h     - Hidden layers, default = 1
+# eta   - Learning rate, default = 0.5
+
+import numpy as np
+import pickle
+import os
+
+class Backprop():
+    def __init__(self, n, m, h = 1):
+        # self.vec = np.array([1,5])
+        self.n = n
+        self.m = m
+        self.h = h
+        self.w_ih = (np.random.random((n + 1, h))) / n
+        self.w_ho = (np.random.random((h + 1, m))) / n
+
+    def __str__(self):
+        return "Back-prop with {} inputs, {} outputs and {} hidden units".format(self.n, self.m, self.h)
+
+    def sigmoid(self, val):
+        return 1 / (1 + np.exp(-val))
+
+    def dsigmoid(self, val):
+        return val * (1 - val)
+
+    def test(self, I):
+        H = np.dot(np.hstack((I, np.ones((len(I), 1)))), self.w_ih)
+        H = self.sigmoid(H)
+        O = np.dot(np.hstack((H, np.ones((len(H), 1)))), self.w_ho)
+        O = self.sigmoid(O)
+        return(O)
+
+    def save(self,bp, ipart, h, eta):
+        fileName = './part{}/Part{}_h{}_eta{}.wgt'.format(ipart, ipart, h, np.round(eta,1))
+        pickle.dump(bp, open(fileName, "wb"))
+
+    def load(self, ipart, h, eta):
+        fileName = './part{}/Part{}_h{}_eta{}.wgt'.format(ipart, ipart, h, np.round(eta,1))
+        return pickle.load(open(fileName, "rb"))
+
+    def RMS(self, T, O):
+        return np.sqrt(np.mean((T - O)**2))
+
+    def XOR_RMS(self, T, O):
+        return np.sqrt(np.mean((T[1::3] - O[1::3]) ** 2))
+
+    def train(self, I, T, niter=1000, eta = 0.5, mu  =0, rms_flag = 0, hidden = 0, report = 1):
+
+        rms = np.zeros(niter)
+
+        for n in range(niter):
+            O_full = np.zeros((I.shape[0], self.m))
+            for k in range(I.shape[1]):
+                i = np.append(I[k,:], 1)
+                H_net = np.dot(i, self.w_ih)
+                H = self.sigmoid(H_net)
+                H_ = np.append(H, 1)
+                O_net = np.dot(H_, self.w_ho)
+                O = self.sigmoid(O_net)
+                O_full[k,:] = O
+
+                delta_o = (T[:] - O) * self.dsigmoid(O)
+                delta_h = (np.dot(delta_o, self.w_ho.T))[:-1]
+                delta_h = delta_h * self.dsigmoid(H)
+
+                dw_ih = np.outer(i, delta_h)
+                dw_ho = np.outer(H_, delta_o)
+
+                self.w_ih += eta * dw_ih
+                self.w_ho += eta * dw_ho
+
+            rms[n] = self.RMS(T, O_full)
+            rms = rms.astype('float')
+            if report and n%10==0 and n>0:
+                print("{}/{}: {:.6f}".format(n, niter, rms[n]))
