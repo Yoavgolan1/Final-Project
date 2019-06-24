@@ -6,7 +6,7 @@ class Trajectories:
         return
 
 def create_trajectory(n_timesteps=200, duration=10, initial_speed_interval=(0, 10),
-                      initial_angle_interval=(15, 165), noise=.2, g=9.81):
+                      initial_angle_interval=(15, 165), noise=.2, g=9.81, basket=[(2, 1), (8, 1)]):
     # create_trajectories receives a bunch of trajectory parameters, and returns a trajectory as a tuple of
     # x and y coordinates. n_timesteps is the number of points in the trajectory, duration is the total time of
     # flight, i.e. the trajectory starts at time 0 and ends at time 'duration'. initial_speed_interval is the interval
@@ -33,7 +33,9 @@ def create_trajectory(n_timesteps=200, duration=10, initial_speed_interval=(0, 1
     # for ii in range(n_timesteps):
     #     trajectory_x[ii] = x0 + v0x * t[ii] + np.random.uniform(-noise, noise)
     #     trajectory_y[ii] = y0 + v0y * t[ii] + 0.5 * (-g) * t[ii]**2 + np.random.uniform(-noise, noise)
-    return (trajectory_x, trajectory_y)
+
+    success = inBasket(v0x=v0x, v0y=v0y, basket=basket, g=g)
+    return (trajectory_x, trajectory_y), success
 
 
 def split_trajectory(traj, split_ratio=0.8):
@@ -65,6 +67,9 @@ def split_trajectory(traj, split_ratio=0.8):
 
     return input, output
 
+
+
+
 def plot(traj_x, traj_y):
 
     plt.plot(traj_x, traj_y, 'o-r')
@@ -74,10 +79,52 @@ def plot(traj_x, traj_y):
     plt.title('Trajectory')
     # plt.show()
 
-def inBasket(alpha = 45, vel = 5):
 
-    Basket_CPos = [10, 5]
+def inBasket(v0x=2, v0y=10, basket=[(3, 2), (4, 2)], g=9.81):
+    xt1 = basket[0][0]
+    yt1 = basket[0][1]
+    xt2 = basket[1][0]
+    yt2 = basket[1][1]
 
-#t_x = create_trajectory(20)
+    line_eq_m = (yt1-yt2)/(xt1-xt2)
+    line_eq_n = -line_eq_m*xt1 + yt1
 
+    para_eq_a = 0.5 * (-g) / (v0x**2)
+    para_eq_b = v0y/v0x
+    para_eq_c = 0
+
+    new_para_eq_a = para_eq_a
+    new_para_eq_b = para_eq_b - line_eq_m
+    new_para_eq_c = para_eq_c - line_eq_n
+
+    if (new_para_eq_b**2 - 4 * new_para_eq_a * new_para_eq_c) < 0:  # There are no coinciding points
+        #print("no coincidence")
+        return 0
+    else:  # There are one or two coinciding points
+        x1 = (-new_para_eq_b + np.sqrt(new_para_eq_b**2 - 4 * new_para_eq_a * new_para_eq_c))/(2*new_para_eq_a)
+        y1 = para_eq_a * x1**2 + para_eq_b * x1 + para_eq_c
+
+        x2 = (-new_para_eq_b - np.sqrt(new_para_eq_b ** 2 - 4 * new_para_eq_a * new_para_eq_c)) / (2 * new_para_eq_a)
+        y2 = para_eq_a * x2 ** 2 + para_eq_b * x2 + para_eq_c
+
+    x_low = np.min([xt1, xt2])
+    x_high = np.max([xt1, xt2])
+    y_low = np.min([yt1, yt2])
+    y_high = np.max([yt1, yt2])
+
+    if ((x1 >= x_low) and (x1 <= x_high)) and ((y1 >= y_low) and (y1 <= y_high)):
+        #print("in")
+        return 1
+    elif ((x2 >= x_low) and (x2 <= x_high)) and ((y2 >= y_low) and (y2 <= y_high)):
+        #print("in")
+        return 1
+    else:
+        #print("out")
+        return 0
+
+
+t_x, s = create_trajectory(20)
+
+print(s)
+#inBasket(v0x=2, v0y = 10)
 #mm, nn = split_trajectory(t_x)
