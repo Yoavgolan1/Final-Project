@@ -1,3 +1,9 @@
 #Project name: AI-LJ
 
-<img src="table1.png">
+## Creating data set for training
+
+## Testing - Results
+
+## Conclusions
+
+<img src="table1.png" align="center" width=500>
