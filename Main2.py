@@ -16,30 +16,24 @@ fig = plt.figure()
 
 Itraj = np.zeros((n_trajectories, trajectory_length))
 Ttraj = np.zeros((n_trajectories, 1))
+
 for ii in range(n_trajectories):
     Itraj[ii], Ttraj[ii] = trj.create_trajectory(n_timesteps=trajectory_length, duration = 14, initial_speed_interval=(150, 150), initial_angle_interval=(44, 45), noise=1)
-
-    marker = '--r'
-    if Ttraj[ii] == True:
-        marker = '--g'
+    marker = '--r' if Ttraj[ii] == True else marker = '--g'
     plt.plot(Itraj[ii,:trajectory_length/2], Itraj[ii,trajectory_length/2:], marker, alpha = 0.1)
-
 plt.show()
 
 bp = Backprop(n = trajectory_length, m = 1, h = 2)
 bp.train(Itraj, Ttraj)
 
+## Test
 Itest, Ttest = trj.create_trajectory(n_timesteps = trajectory_length, duration=14, initial_speed_interval = (150, 150), initial_angle_interval = (44, 45), noise = 1)
 O = bp.test(Itest)
 
 fig = plt.figure()
-line_color = 'r'
-if O == Ttest:
-    line_color = 'g'
-line_style = '--'
-if O == Ttest:
-    line_style = '-'
-plt.plot(Itraj[ii, :trajectory_length/2], Itraj[ii, trajectory_length/2:], linestyle = line_style, color = line_color, alpha = 0.1)
+line_color = 'g' if O == Ttest else line_color = 'r'
+line_style = '-' if O == Ttest else line_style = '--'
+plt.plot(Itest[:trajectory_length/2], Itest[trajectory_length/2:], linestyle = line_style, color = line_color, alpha = 0.1)
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.title('Test result')
