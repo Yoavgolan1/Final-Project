@@ -35,7 +35,8 @@ def create_trajectory(n_timesteps=200, duration=10, initial_speed_interval=(0, 1
     #     trajectory_y[ii] = y0 + v0y * t[ii] + 0.5 * (-g) * t[ii]**2 + np.random.uniform(-noise, noise)
 
     success = inBasket(v0x=v0x, v0y=v0y, basket=basket, g=g)
-    return (trajectory_x, trajectory_y), success
+    # print("v0x={}\tv0y={}\tsuccess={}".format(v0x, v0y,success))
+    return np.append(trajectory_x, trajectory_y).reshape((1,n_timesteps*2)), success
 
 
 def split_trajectory(traj, split_ratio=0.8):
@@ -102,10 +103,10 @@ def inBasket(v0x=2, v0y=10, basket=[(3, 2), (4, 2)], g=9.81):
         return 0
     else:  # There are one or two coinciding points
         x1 = (-new_para_eq_b + np.sqrt(new_para_eq_b**2 - 4 * new_para_eq_a * new_para_eq_c))/(2*new_para_eq_a)
-        y1 = para_eq_a * x1**2 + para_eq_b * x1 + para_eq_c
+        y1 = np.round((para_eq_a * x1**2 + para_eq_b * x1 + para_eq_c), 5)
 
         x2 = (-new_para_eq_b - np.sqrt(new_para_eq_b ** 2 - 4 * new_para_eq_a * new_para_eq_c)) / (2 * new_para_eq_a)
-        y2 = para_eq_a * x2 ** 2 + para_eq_b * x2 + para_eq_c
+        y2 = np.round((para_eq_a * x2 ** 2 + para_eq_b * x2 + para_eq_c), 5)
 
     x_low = np.min([xt1, xt2])
     x_high = np.max([xt1, xt2])
@@ -123,8 +124,8 @@ def inBasket(v0x=2, v0y=10, basket=[(3, 2), (4, 2)], g=9.81):
         return 0
 
 
-t_x, s = create_trajectory(20)
+# t_x, s = create_trajectory(20)
 
-print(s)
+# print(s)
 #inBasket(v0x=2, v0y = 10)
 #mm, nn = split_trajectory(t_x)
