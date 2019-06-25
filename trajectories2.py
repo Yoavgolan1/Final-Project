@@ -37,14 +37,11 @@ def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(
     trajectory_y = y0 + v0y * t + np.random.normal(size = n_timesteps) * noise
     trajectory_z = z0 + v0z * t + 0.5 * (-g) * t**2 + np.random.normal(size = n_timesteps) * noise
 
-    # success = inBasket(v0x=v0x, v0y=v0y, basket=basket, g=g)
     t_target = 2*v0z/g
     x_traget = x0 + v0x * t_target
     y_traget = y0 + v0y * t_target
     z_target = 0
     target_POS = np.asarray([x_traget, y_traget, z_target])
-    # print("v0x={}\tv0y={}\tsuccess={}".format(v0x, v0y,success))
-    # return np.append(trajectory_x, trajectory_y, trajectory_z).reshape((1,n_timesteps*3)), target_POS
     traj_vec = np.asarray([trajectory_x, trajectory_y, trajectory_z]).reshape((1, n_timesteps * 3))
     return traj_vec, target_POS
 
@@ -57,10 +54,8 @@ def solver(dt, trajectory):
     t = np.arange(0, int((len(xtraj) - 1) * dt) + dt, dt)
     px = np.polyfit(t, xtraj, 1)
     ppx = np.poly1d(px)
-
     py = np.polyfit(t, ytraj, 1)
     ppy = np.poly1d(py)
-
     pz = np.polyfit(t, ztraj, 2)
     ppz = np.poly1d(pz)
 
@@ -71,5 +66,8 @@ def solver(dt, trajectory):
 
     return np.asarray([ppx(t_target), ppy(t_target), ppz(t_target)])
 
-def RMS(t1,t2):
-    return np.sqrt(np.mean((t1 - t2)**2))
+def RMS(val1, val2):
+    return np.sqrt(np.mean((val2 - val1)**2))
+
+def error(val1, val2):
+    return np.sqrt(np.sum(val1 - val2)**2)
