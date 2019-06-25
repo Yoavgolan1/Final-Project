@@ -30,7 +30,30 @@ for ii in range(n_trajectories):
     color = np.random.rand(3)
     ax.plot(x_pos, y_pos, z_pos, '-', color = color, alpha = 1)
     ax.plot([Ttraj[ii,0]], [Ttraj[ii,1]], [Ttraj[ii,2]], 'x', color = color)
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.zlabel('Z')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+# plt.show()
+
+plt.figure()
+t = np.arange(time_interval[0], time_interval[1]+dt, dt)
+plt.subplot(2, 1, 1)
+x_pos = Itraj[ii, 0:n_time_steps]
+y_pos = Itraj[ii, n_time_steps:n_time_steps*2]
+z_pos = Itraj[ii, n_time_steps*2:]
+plt.plot(t, x_pos, 'r')
+plt.plot(t, y_pos, 'b')
+plt.plot(t, z_pos, 'k')
+plt.xlabel('Time [sec]')
+plt.ylabel('Position [m]')
+
+plt.subplot(2, 1, 2)
+n_start = 0
+n_end = int(0.5/dt+1)
+plt.plot(t[n_start:n_end], x_pos[n_start:n_end], 'r')
+plt.plot(t[n_start:n_end], y_pos[n_start:n_end], 'b')
+plt.plot(t[n_start:n_end], z_pos[n_start:n_end], 'k')
+plt.xlabel('Time [sec]')
+plt.ylabel('Position [m]')
+
 plt.show()
