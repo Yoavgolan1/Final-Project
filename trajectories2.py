@@ -47,3 +47,29 @@ def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(
     # return np.append(trajectory_x, trajectory_y, trajectory_z).reshape((1,n_timesteps*3)), target_POS
     traj_vec = np.asarray([trajectory_x, trajectory_y, trajectory_z]).reshape((1, n_timesteps * 3))
     return traj_vec, target_POS
+
+def solver(dt, trajectory):
+    n = int(len(trajectory)/3)
+    xtraj = trajectory[:n]
+    ytraj = trajectory[n:2*n]
+    ztraj = trajectory[2*n:]
+
+    t = np.arange(0, int((len(xtraj) - 1) * dt) + dt, dt)
+    px = np.polyfit(t, xtraj, 1)
+    ppx = np.poly1d(px)
+
+    py = np.polyfit(t, ytraj, 1)
+    ppy = np.poly1d(py)
+
+    pz = np.polyfit(t, ztraj, 2)
+    ppz = np.poly1d(pz)
+
+    dd = np.sqrt( pz[1]**2-4*pz[0]*pz[2])
+    t1 = (-pz[1] + dd) / (2*pz[0])
+    t2 = (-pz[1] - dd) / (2*pz[0])
+    t_target = np.max([t1,t2])
+
+    return np.asarray([ppx(t_target), ppy(t_target), ppz(t_target)])
+
+def RMS(t1,t2):
+    return np.sqrt(np.mean((t1 - t2)**2))
