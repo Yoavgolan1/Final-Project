@@ -7,7 +7,7 @@ class Trajectories:
 
 def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(0, 10),
                       initial_angleAZ_interval=(15, 165), initial_angleAL_interval=(15, 165),
-                      noise=.2, g=9.81, basket=[(2, 1), (8, 1)]):
+                      noise=.2, g=9.81):
     # create_trajectories receives a bunch of trajectory parameters, and returns a trajectory as a tuple of
     # x and y coordinates. n_timesteps is the number of points in the trajectory, duration is the total time of
     # flight, i.e. the trajectory starts at time 0 and ends at time 'duration'. initial_speed_interval is the interval
@@ -15,7 +15,6 @@ def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(
     # which the initial trajectory angle is selected. noise is the magnitude of randomized noise in the trajectory. g
     # is the gravitational constant. The trajectory originates from 0,0.
 
-    # t = np.linspace(0, duration, n_timesteps)
     t = np.arange(time_interval[0], time_interval[1]+dt, dt)
     n_timesteps = len(t)
 
@@ -45,4 +44,6 @@ def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(
     z_target = 0
     target_POS = np.asarray([x_traget, y_traget, z_target])
     # print("v0x={}\tv0y={}\tsuccess={}".format(v0x, v0y,success))
-    return np.append(trajectory_x, trajectory_y, trajectory_z).reshape((1,n_timesteps*3)), target_POS
+    # return np.append(trajectory_x, trajectory_y, trajectory_z).reshape((1,n_timesteps*3)), target_POS
+    traj_vec = np.asarray([trajectory_x, trajectory_y, trajectory_z]).reshape((1, n_timesteps * 3))
+    return traj_vec, target_POS
