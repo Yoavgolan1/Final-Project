@@ -4,8 +4,8 @@ from backprop_old import Backprop
 import matplotlib.pyplot as plt
 
 # Create training set
-n_trajectories = 5000
-trajectory_length = 10
+n_trajectories = 10000
+trajectory_length = 100
 # split_ratio = 0.9
 
 inputs_length = 2*np.round(trajectory_length).astype(int)
@@ -33,7 +33,7 @@ for ii in range(n_trajectories):
     if Ttraj[ii] == True:
         marker = '--g'
 
-    plt.plot(Itraj[ii, :trajectory_length], Itraj[ii,trajectory_length:], marker, alpha = 0.1)
+    #plt.plot(Itraj[ii, :trajectory_length], Itraj[ii,trajectory_length:], marker, alpha = 0.1)
 # plt.show()
 
 bp = Backprop(n = trajectory_length*2, m = 1, h = 50)
@@ -61,7 +61,7 @@ for i in range(200):
     # line_style = '-' if O == Ttest else line_style = '--'
     line_color = 'r'
     #print(O)
-    if O > 0.30:
+    if O > 0.35:
         line_color = 'g'
     line_style = '--'
     if Ttest ==1:
