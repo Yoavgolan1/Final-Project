@@ -68,4 +68,6 @@ plt.plot(t[n_start:n_end], z_pos[n_start:n_end], '-+k')
 plt.xlabel('Time [sec]')
 plt.ylabel('Position [m]')
 
+plt.figure()
+plt.hist(ePos)
 plt.show()
