@@ -35,7 +35,7 @@ def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(
 
     trajectory_x = x0 + v0x * t + np.random.normal(size = n_timesteps) * noise
     trajectory_y = y0 + v0y * t + np.random.normal(size = n_timesteps) * noise
-    trajectory_z = z0 + v0z * t + 0.5 * (-g) * t**2 + np.random.normal(size = n_timesteps) * noise
+    trajectory_z = z0 + v0z * t + 0.5 * (-g) * t**2 + np.random.normal(0, 1, size = n_timesteps) * noise
 
     t_target = 2*v0z/g
     x_traget = x0 + v0x * t_target
@@ -70,4 +70,4 @@ def RMS(val1, val2):
     return np.sqrt(np.mean((val2 - val1)**2))
 
 def error(val1, val2):
-    return np.sqrt(np.sum(val1 - val2)**2)
+    return np.sqrt(np.sum((val1 - val2)**2))
