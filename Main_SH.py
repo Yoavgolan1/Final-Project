@@ -7,7 +7,7 @@ import csv
 
 
 # Create training set
-n_trajectories = 2
+n_trajectories = 10
 dt = 0.1
 time_interval = (0,90)
 initial_speed_interval = (650, 750)
@@ -33,11 +33,11 @@ for ii in range(n_trajectories):
     # print("RMS = {:.3f}".format(RMS[ii]))
 
     # Plot each trajectory
-    # x_pos = Itraj[ii, 0:n_time_steps]
-    # y_pos = Itraj[ii, n_time_steps:n_time_steps*2]
-    # z_pos = Itraj[ii, n_time_steps*2:]
-    # color = np.random.rand(3)
-    # ax.plot(x_pos, y_pos, z_pos, '-', color = color, alpha = 1)
+    x_pos = Itraj[:, (ii*3)]
+    y_pos = Itraj[:, (ii*3)+1]
+    z_pos = Itraj[:, (ii*3)+2]
+    color = np.random.rand(3)
+    ax.plot(x_pos, y_pos, z_pos, '-', color = color, alpha = 1)
     # ax.plot([Ttraj[ii,0]], [Ttraj[ii,1]], [Ttraj[ii,2]], 'x', color = color)
     # ax.plot([target_estimated[0]], [target_estimated[1]], [target_estimated[2]], '.', color=color)
 
@@ -51,7 +51,7 @@ print("Mean error pos = {:.3f}".format(np.mean(ePos)))
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
-# plt.show()
+plt.show()
 
 # plt.figure()
 # t = np.arange(time_interval[0], time_interval[1]+dt, dt)
