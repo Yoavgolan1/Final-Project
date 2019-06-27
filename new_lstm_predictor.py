@@ -45,7 +45,7 @@ dataset = my_data
 dataset2 = my_data2
 
 # choose a number of time steps
-n_steps_in, n_steps_out = 10, 10
+n_steps_in, n_steps_out = 10, 1
 # covert into input/output
 
 
@@ -68,7 +68,7 @@ model.compile(optimizer='adam', loss='mse')
 # fit model
 #model.fit(X, y, epochs=300, verbose=0)
 
-epochs = 3000
+epochs = 300
 X_batches = [X, X2]
 y_batches = [y, y2]
 n_batches = 2
@@ -149,7 +149,7 @@ def train_lstm(model, input_trajectories, epochs, n_steps_in, n_steps_out):
             print(i, "/", epochs, " RMS:", sse)
 
 
-new_trajs = read_trajectories('input_trajectories.csv')
+new_trajs = read_trajectories('input_trajectories_big.csv')
 
 old_trajs = read_trajectories('newfile.csv')
 
