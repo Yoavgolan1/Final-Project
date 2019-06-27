@@ -37,4 +37,10 @@ If you want to play around with it, you can change the following trajectory para
 3. "initial_speed_interval" is the initial speed interval, within which a speed is randomly selected
 4. "initial_angleAZ_Interval", "initial_angleAl_Interval" are the initial trajectory azimuth and elevation angles intervals, respectively. The initial angles are selected from within these intervals randomly.
 5. "input_size" is the number of observation points from which the model will attempt to make a prediction
-6. "output_size" is the number of sequential obserations points the model will predict
+6. "output_size" is the number of sequential observations points the model will predict
+
+## References
+We learned about time series forecasting from the following website:
+https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
+
+The basic architecture of the LSTM model, as well as the function "split sequences" were taken from an example in the website.
