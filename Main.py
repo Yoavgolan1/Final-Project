@@ -1,5 +1,5 @@
 import numpy as np
-import trajectories2 as trj
+import trajectory_functions as trj
 from lstm_predictor import LSTM_Predictor
 
 
