@@ -1,57 +1,40 @@
-<!--https://www.codecogs.com/latex/eqneditor.php-->
+# Trajectory Prediction using LSTM
 
+## The Problem
+We wish to predict the continuation of a given trajectory in 3D space. A trajectory is given as a set of (x,y,z) coordinates, representing some motion in space. In our case, we used standard ballistic trajectories.
+We want to predict the continuation of the trajectory. Since an artificially predicted trajectory continuation is a trajectory itself, in theory a trajectory could be predicted forward in time until infinity. Practically, we will attempt to predict the continuations of trajectories that haven't yet touched the ground (z=0), until they do. 
 
-#Project name: AI-LJ
+## Our Solution
+We use an LSTM network that receives three vectors of x,y,z coordinates, and outputs three vectors of x,y,z predictions. The vectors of both the inputs and outputs are variable. For instance, one can choost to predict one time step forward (len(x_predicted)=1), by examining the ten previous time steps (len(x_input)=10). One can also predict multiple time steps ahead if desired.
 
-## Creating data set for training
+Our model is sequential, and uses the following layers: LSTM, RepeatVector, LSTM, TimeDistributed. We use relu as an activation function for both LSTM layers, and the 'adam' optimizing method with 'mse' loss function.
 
-## inBasket function
-inBasket is a function that determines whether or not a trajectory intersects a basket. The determination is analytical, and correct.
-The function receives the initial speeds (in the x and y direction), the gravitational constant (g), and a basket. The basket is defined as two points in space, so that the line segment between them is the basket itself. If the trajectory intersects this line segment, the function returns a positive answer. If the trajectory does not intersect with the basket, it returns a negative answer.
-To determine the intersection, the function does the following:
-1)	The trajectory parabola is found by substituting for time
-2)	The infinite basket line is found by two points
-3)	The line and parabola are compared to find coincident points
-4)	Coincident points are checked. If one is in the basket line segment, a true answer is returned
+### Training
+Our LSTM network is trained on a large set of trajectories that vary in their initial speed and angle. A single trajectory is a NX3 matrix, where N is the length of the trajectory, in time steps. A trajectory dataset is a matrix of size NX3*M, and holds M trajectories. This dataset is saved as a csv file in our project, and is generated randomly at the start of an operation.
+The model can save or load its weights to avoid needless retraining. However, keep in mind that the weights fit a specific number of predicted points, and number of points to predict from. If you change this number (say you want to use 6 points to predict 1 instead of 3 points to predict 1), you need to retrain.
 
-The trajectory parabola was originally represented by x, y and time:
-![x=v0*t](https://latex.codecogs.com/gif.latex?x%3DV_%7B0%7D%5Ccdot%20t)
-$y=v_{0,y}t + \frac{1}{2}gt^2$
-Substituting t to solve for x, y at any time:
-$t=\frac{x}{v_{x,0}}$
-$y=\frac{v_{y,0}}{v_{x,0}}x + \frac{g}{2v_{x,0}^2}x^2$
-Simplifying:
-a=\frac{g}{2v_{x,0}^2},\\ b=\frac{v_{y,0}}{v_{x,0}},\\ c=0$
-We have a simple parabolic equation:
-$y_{parab}=ax^2+bx+c$
-Next we find the line equation by two points- $(x_{b1},y_{b1}), (x_{b2},y_{b2})$. The slope of the line is:
-$m=\frac{y_{b2}-y_{b1}}{x_{b2}-x_{b1}}$
-The y intercept is:
-$n=-mx_1+y_1$
-Giving us the line:
-$y_{line}=mx+n$
-To find intersecting points, we will compare $y_{parab}=y_{line}$, and solve for 0:
-$0= ax^2+bx+c –mx –n$
-Let’s rename the coefficients of x:
-$A = a,\\ B =b-m,\\ C=c-n$
-$Ax^2+Bx+C=0$
-We can find the 0-intercept points by solving the quadratic equation:
-$x_{1,2}=\frac{-B\pm\sqrt{B^2-4AC}}{2A}$
-First we test the discriminant to find if there are intersection points at all. If $B^2-4AC<0$, there are no interception points and the function returns a false answer. The quadratic equation is not applied, because it would result in an imaginary number that has no value to us. If the discriminant is greater or equal to zero, there is one or two intersection points. We find their x coordinated by solving the quadratic equation.
-We find the corresponding y values of these points by substituting $x_{1,2}$ in the line or parabolic equation.
-$y_1=ax_1^2+bx_1+c$
-$y_2=ax_2^2+bx_2+c$
-We then check if $(x_1,y_1)$ or $(x_2,y_2)$ are within the interval $(x_{b1},y_{b1}), (x_{b2},y_{b2})$. This is done by component, i.e., $x_1 > min(x_{b1},x_{b2})$.
-If either of the points does intersect the basket, “True” is returned. Otherwise- “False”.
+## Testing
+As a test, our model accepts a trajectory of some length, and disregards all of it except the last few points. The number of points it uses is the length of the input vector. I.e, if the model uses 3 points to predict 2 points forward, and the model is tested on a 100 point long trajectory, it will only use points 97, 98, 99 to predict points 100, 101.
+Practically, we want to continue the trajectory until z=0, but we don't know how many steps forward that will be. Instead, we predict only one point forward, and then retry until the ground is reached.
 
-## Testing - Results
+#### Example
+Let's say we have an input trajectory with 100 points [p0..p99], each point has 3 coordinates- x,y,z. We train our model to predict one step forward, using the last three points. Testing our podel on p, it takes p97, p98, p99 and predicts a new point p100. We check to see if the z coordinate of p100 has reached zero or below, and if not, we retest the model using p98, p99, p100 to predict a new point p101. We repeat these steps until the ground is hit.
+<img src="plot_1.png" align="center" width=400>
+<img src="plot_2.png" align="center" width=400>
+<img src="plot_3.png" align="center" width=400>
+<img src="plot_4.png" align="center" width=400>
+<img src="plot_5.png" align="center" width=400>
 
-## Conclusions
+## General Information
+We use trajectories that mimic a ballistic trajectory from Gaza to Be'er Sheva (roughly 40km). We train our model on 1000 trajectories, and test it on a new randomly created trajectory. We compare the predicted point of impact with the true point of impact, inferred by the trajectory creator analytically. The distance between the true impact point and predicted impact point is divided by the true impact point distance from the point of origin, and the result is the error of prediction we report.
+The RMS error reported in training represents the average euclidean distance between the last predicted point, to the true point, in a training set.
 
-<img src="table1.png" align="center" width=300>
-
-
-![a*x^2+b*x+c=0](https://latex.codecogs.com/gif.latex?A%5Ccdot%20x%5E2&plus;B%5Ccdot%20x&plus;C%3D0)
-
-![0=A\cdotx^2+B\cdot x+C-(m\cdot x+n)](https://latex.codecogs.com/gif.latex?0%3DA%5Ccdot%20x%5E2&plus;B%5Ccdot%20x&plus;C-%28m%5Ccdot%20x&plus;n%29)
-
+## How to Run?
+Press F5 on the "Main.py" file. That's it.
+If you want to play around with it, you can change the following trajectory parameters:
+1. "dt" is the time difference between two timesteps (two observation points)
+2. "time_interval" is the duration of the trajectory
+3. "initial_speed_interval" is the initial speed interval, within which a speed is randomly selected
+4. "initial_angleAZ_Interval", "initial_angleAl_Interval" are the initial trajectory azimuth and elevation angles intervals, respectively. The initial angles are selected from within these intervals randomly.
+5. "input_size" is the number of observation points from which the model will attempt to make a prediction
+6. "output_size" is the number of sequential obserations points the model will predict
