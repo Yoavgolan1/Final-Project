@@ -4,11 +4,14 @@ from tqdm import tqdm
 
 
 class LSTM_Predictor:
-    def __init__(self, n_steps_in, n_steps_out):
+    def __init__(self, n_steps_in, n_steps_out, n_hidden_1=200, n_hidden_2=200):
         self.n_steps_in = n_steps_in
         self.n_steps_out = n_steps_out
         self.n_features = 3  # Three coordinates in euclidean space
+        self.n_hidden_1 = n_hidden_1
+        self.n_hidden_2 = n_hidden_2
         self.construct_lstm_model()
+
 
     def __str__(self):
         return 'An LSTM object that predicts {self.n_steps_out} trajectory steps' \
@@ -38,11 +41,12 @@ class LSTM_Predictor:
             trajectories[ii] = my_data[:, ii * 3:ii * 3 + 3]
         return trajectories
 
-    def construct_lstm_model(self, n_hidden_1=200, n_hidden_2=200):
+    def construct_lstm_model(self):
         model = tf.keras.Sequential()
-        model.add(tf.keras.layers.LSTM(n_hidden_1, activation='relu', input_shape=(self.n_steps_in, self.n_features)))
+        model.add(tf.keras.layers.LSTM(self.n_hidden_1, activation='relu',
+                                       input_shape=(self.n_steps_in, self.n_features)))
         model.add(tf.keras.layers.RepeatVector(self.n_steps_out))
-        model.add(tf.keras.layers.LSTM(n_hidden_2, activation='relu', return_sequences=True))
+        model.add(tf.keras.layers.LSTM(self.n_hidden_2, activation='relu', return_sequences=True))
         model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(self.n_features)))
         model.compile(optimizer='adam', loss='mse')
         self.model = model
@@ -62,6 +66,14 @@ class LSTM_Predictor:
             this_X, this_y = self.split_sequences(this_trajectory)
             X_batches.append(this_X)
             y_batches.append(this_y)
+
+        batches_in_trajectory = X_batches[0].shape[0]
+        Combined_X_batches = np.zeros((n_trajectories*batches_in_trajectory, self.n_steps_in, self.n_features))
+        for i in range(n_trajectories):
+            Combined_X_batches[i*batches_in_trajectory : i*batches_in_trajectory + batches_in_trajectory, :, :]\
+                = X_batches[i]
+
+        #self.model.fit(X_batches[0], y_batches[0], batch_size=1, epochs=epochs, verbose=1)
 
         for i in tqdm(range(epochs)):
             for j in range(n_trajectories):
@@ -101,16 +113,13 @@ class LSTM_Predictor:
         return y_output[0, :, :]
 
 
+my_lstm = LSTM_Predictor(3, 1, 256, 256)
+my_lstm.train('input_trajectories.csv', epochs=300)
 
-
-
-
-my_lstm = LSTM_Predictor(3, 20)
-my_lstm.train('input_trajectories.csv', epochs=100)
-
-#my_lstm.load('test_weights')
-my_weights = my_lstm.save('test_weights')
+# my_lstm.load('test_weights')
+my_lstm.save('test_weights')
 
 input_block = np.array([[74.446, 529.7, -100.2279], [75.59, 537.863, -105.072], [76.737, 546.0126, -110.01804]])
 
 next_guess = my_lstm.test(input_block)
+print(next_guess)
