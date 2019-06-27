@@ -1,7 +1,6 @@
 import numpy as np
 import trajectories2 as trj
 from lstm_predictor import LSTM_Predictor
-import matplotlib.pyplot as plt
 
 
 # --------------------------------------------- Create Training Set ---------------------------------------------- #
