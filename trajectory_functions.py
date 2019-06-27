@@ -1,12 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D  # This looks unused but it is used
 
 
 # Create training set
-
-
 def create_dataSet(n_trajectories=100, dt=0.1, time_interval=(0, 10), initial_speed_interval=(0, 10),
                       initial_angleAZ_interval=(15, 165), initial_angleAL_interval=(15, 165),
                       noise=20, g=9.81, plot=False):
@@ -18,14 +16,14 @@ def create_dataSet(n_trajectories=100, dt=0.1, time_interval=(0, 10), initial_sp
     RMS = np.zeros(n_trajectories)
     ePos = np.zeros(n_trajectories)
     for ii in range(n_trajectories):
-        Itraj[:, (ii * 3):(ii * 3 + 3)], Ttraj[0, (ii * 3):(ii * 3 + 3)] = create_trajectory(dt=dt,
-                                                                                             time_interval=time_interval,
-                                                                                             initial_speed_interval=initial_speed_interval,
-                                                                                             initial_angleAZ_interval=initial_angleAZ_interval,
-                                                                                             initial_angleAL_interval=initial_angleAL_interval,
-                                                                                             noise = noise, g = g)
+        Itraj[:, (ii * 3):(ii * 3 + 3)], Ttraj[0, (ii * 3):(ii * 3 + 3)] =\
+            create_trajectory(dt=dt, time_interval=time_interval,
+                              initial_speed_interval=initial_speed_interval,
+                              initial_angleAZ_interval=initial_angleAZ_interval,
+                              initial_angleAL_interval=initial_angleAL_interval, noise=noise, g=g)
+
         Ttraj[1, (ii * 3):(ii * 3 + 3)] = solver(dt, Itraj[:, (ii * 3):(ii * 3 + 3)])
-    if (plot):
+    if plot:
         # Plot each trajectory
         fig = plt.figure()
         ax = fig.gca(projection='3d')
@@ -47,14 +45,14 @@ def create_dataSet(n_trajectories=100, dt=0.1, time_interval=(0, 10), initial_sp
 def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(0, 10),
                       initial_angleAZ_interval=(15, 165), initial_angleAL_interval=(15, 165),
                       noise=1, g=9.81):
-    # create_trajectories receives a bunch of trajectory parameters, and returns a trajectory as a tuple of
-    # dt - is time-steps between two points in the trajectory (observation points)
-
-    # x and y coordinates. n_timesteps is the number of points in the trajectory, duration is the total time of
-    # flight, i.e. the trajectory starts at time 0 and ends at time 'duration'. initial_speed_interval is the interval
-    # within which the initial speed of the trajectory is selected. initial_angle_interval is the interval within
-    # which the initial trajectory angle is selected. noise is the magnitude of randomized noise in the trajectory. g
-    # is the gravitational constant. The trajectory originates from 0,0.
+    # create_trajectories receives a bunch of trajectory parameters, and returns a trajectory as a matrix.
+    # dt - the time difference between two points in the trajectory (observation points)
+    # time_interval - the duration of the trajectory (default- flies from time 0 to time 10s)
+    # initial_speed_interval - the interval in which the initial speed is randomly sampled
+    # initial_angleAZ_interval - the interval in which the initial trajectory azimuth is randomly sampled
+    # initial_angleAL_interval - the interval in which the initial trajectory elevation is randomly sampled
+    # noise - the standard deviation of random noise added to the trajectory
+    # g - the gravitational constant
 
     t = np.arange(time_interval[0], time_interval[1]+dt, dt)
     n_timesteps = len(t)
