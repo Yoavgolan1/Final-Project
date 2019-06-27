@@ -12,7 +12,6 @@ class LSTM_Predictor:
         self.n_hidden_2 = n_hidden_2
         self.construct_lstm_model()
 
-
     def __str__(self):
         return 'An LSTM object that predicts {self.n_steps_out} trajectory steps' \
                ' forward by examining {self.n_steps_in} trajectory steps.'.format(self=self)
@@ -74,10 +73,12 @@ class LSTM_Predictor:
                 = X_batches[i]
 
         #self.model.fit(X_batches[0], y_batches[0], batch_size=1, epochs=epochs, verbose=1)
+        # Uncomment this line to train all trajectories together. Comment out the line that uses train_on_batch
 
         for i in tqdm(range(epochs)):
             for j in range(n_trajectories):
                 self.model.train_on_batch(X_batches[j], y_batches[j])
+                # Comment this line if all trajectories are trained together
 
             if (i % report) == 0:
                 sse = 0
@@ -112,14 +113,14 @@ class LSTM_Predictor:
 
         return y_output[0, :, :]
 
-
-my_lstm = LSTM_Predictor(3, 1, 256, 256)
-my_lstm.train('input_trajectories.csv', epochs=300)
-
-# my_lstm.load('test_weights')
-my_lstm.save('test_weights')
-
-input_block = np.array([[74.446, 529.7, -100.2279], [75.59, 537.863, -105.072], [76.737, 546.0126, -110.01804]])
-
-next_guess = my_lstm.test(input_block)
-print(next_guess)
+#
+# my_lstm = LSTM_Predictor(3, 1)
+# my_lstm.train('input_trajectories.csv', epochs=300)
+#
+# # my_lstm.load('test_weights')
+# my_lstm.save('test_weights')
+#
+# input_block = np.array([[74.446, 529.7, -100.2279], [75.59, 537.863, -105.072], [76.737, 546.0126, -110.01804]])
+#
+# #next_guess = my_lstm.test(input_block)
+# #print(next_guess)
