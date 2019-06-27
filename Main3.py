@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Create training set
-n_trajectories = 1
-dt = 0.1
+n_trajectories = 100
+dt = 1
 time_interval = (0,90)
 initial_speed_interval = (650, 750)
 initial_angleAZ_interval = (30, 60)
@@ -17,15 +17,15 @@ trj.create_dataSet(n_trajectories = n_trajectories, dt = dt, time_interval=time_
                    noise = 0, g=9.81, plot = False)
 
 
-inout_size = 10
+inout_size = 20
 output_size = 10
 LSTM = LSTM_Predictor(inout_size, output_size)
-# LSTM.train('data_set_1.csv', epochs=100)
-# LSTM.save('weights')
+LSTM.train('data_set_1.csv', epochs=100)
+LSTM.save('weights')
 LSTM.load('weights')
 
 ## Test
-dt = 0.1
+dt = 1
 time_interval = (0,90)
 initial_speed_interval = (650, 750)
 initial_angleAZ_interval = (30, 60)
@@ -40,7 +40,7 @@ Itraj, Ttraj[0,:] = trj.create_trajectory(dt = dt, time_interval = time_interval
                                                        noise = 0)
 
 def test_and_track(inout_size, Itraj):
-    # print("testing")
+    print("testing")
     hit = False
     predicted_hit_pos = np.zeros((1,3))
     iter = 0
