@@ -95,22 +95,22 @@ class LSTM_Predictor:
         self.model.load_weights(filename, by_name=False)
 
     def test(self, x_input):
-        return self.model.predict(x_input, verbose=0)
+        x_input = x_input.reshape((1, self.n_steps_in, self.n_features))
+        y_output = self.model.predict(x_input, verbose=0)
+
+        return y_output[0, :, :]
 
 
 
 
 
 
-my_lstm = LSTM_Predictor(3, 2)
-#my_lstm.train('input_trajectories.csv', epochs=100)
+my_lstm = LSTM_Predictor(3, 20)
+my_lstm.train('input_trajectories.csv', epochs=100)
 
-
-my_lstm.load('test_weights')
+#my_lstm.load('test_weights')
 my_weights = my_lstm.save('test_weights')
 
-input_block = np.array([[74.446, 529.7, -100.2279], [75.59, 537.863, -105.072], [76.737, 546.0126, -110.018037776834]])
+input_block = np.array([[74.446, 529.7, -100.2279], [75.59, 537.863, -105.072], [76.737, 546.0126, -110.01804]])
 
-print(input_block.shape)
 next_guess = my_lstm.test(input_block)
-print(next_guess)
