@@ -3,15 +3,15 @@ import matplotlib.pyplot as plt
 import csv
 from mpl_toolkits.mplot3d import Axes3D
 
-class Trajectories:
-    def __init__(self):
-        return
 
 # Create training set
 
-def create_dataSet(n_trajectories = 100, dt = 0.1, time_interval=(0, 10), initial_speed_interval=(0, 10),
+
+def create_dataSet(n_trajectories=100, dt=0.1, time_interval=(0, 10), initial_speed_interval=(0, 10),
                       initial_angleAZ_interval=(15, 165), initial_angleAL_interval=(15, 165),
-                      noise = 20, g=9.81, plot=False):
+                      noise=20, g=9.81, plot=False):
+    # Create data set of different trajectories using the "create_trajectory" function.
+    # That data set is saved to a CSV file and then being used for learning
     n_time_steps = int((time_interval[1] - time_interval[0]) / dt + 1)
     Itraj = np.zeros((n_time_steps, 3 * n_trajectories))
     Ttraj = np.zeros((3, 3 * n_trajectories))
@@ -46,8 +46,10 @@ def create_dataSet(n_trajectories = 100, dt = 0.1, time_interval=(0, 10), initia
 
 def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(0, 10),
                       initial_angleAZ_interval=(15, 165), initial_angleAL_interval=(15, 165),
-                      noise = 1, g = 9.81):
+                      noise=1, g=9.81):
     # create_trajectories receives a bunch of trajectory parameters, and returns a trajectory as a tuple of
+    # dt - is time-steps between two points in the trajectory (observation points)
+
     # x and y coordinates. n_timesteps is the number of points in the trajectory, duration is the total time of
     # flight, i.e. the trajectory starts at time 0 and ends at time 'duration'. initial_speed_interval is the interval
     # within which the initial speed of the trajectory is selected. initial_angle_interval is the interval within
@@ -84,6 +86,7 @@ def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(
     traj_vec = np.vstack((np.vstack((trajectory_x, trajectory_y)), trajectory_z)).T
     return traj_vec, target_POS
 
+
 def solver(dt, trajectory):
     xtraj = trajectory[:,0]
     ytraj = trajectory[:,1]
@@ -104,8 +107,52 @@ def solver(dt, trajectory):
 
     return np.asarray([ppx(t_target), ppy(t_target), ppz(t_target)])
 
+
 def RMS(val1, val2):
     return np.sqrt(np.mean((val2 - val1)**2))
 
+
 def error(val1, val2):
     return np.sqrt(np.sum((val1 - val2)**2))
+
+def my_plot(Itraj, Ttraj, predicted_traj, predicted_hit_pos, n_time_steps):
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.plot([Ttraj[0, 0]], [Ttraj[0, 1]], [Ttraj[0, 2]], 'rx', alpha=1, label='Real target')
+    ax.plot(Itraj[:, 0], Itraj[:, 1], Itraj[:, 2], 'b-', alpha=1, label='Observed trajectory')
+
+    ax.plot(predicted_traj[n_time_steps+1:, 0], predicted_traj[n_time_steps+1:, 1],
+            predicted_traj[n_time_steps+1:, 2], 'g-', alpha=1, label='Predicted trajectory')
+    ax.plot([predicted_hit_pos[0]], [predicted_hit_pos[1]], [predicted_hit_pos[2]], 'or', alpha=1, label='Predicted target')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    error = np.mean(np.abs((Ttraj[0, 1:2] - predicted_hit_pos[0:2]) / Ttraj[0, 1:2]) * 100)
+    ax.set_title("Estimated target error: {:.2f}%".format(error))
+    ax.legend(loc='center left', bbox_to_anchor=(0, 0.5))
+    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+    ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0))
+    plt.savefig('plot_10.png')
+    plt.show()
+
+def test_and_track(inout_size, Itraj, Ttraj):
+    # print("testing")
+    hit = False
+    predicted_hit_pos = np.zeros((1, 3))
+    iter = 0
+    while(hit == False):
+        iter += 1
+        x_input = Itraj[-inout_size:, :]
+        predict = LSTM.test(x_input)
+        i = np.where(predict[:, 2] < 0.1)[0]      # search where Z first time is negative
+        if i.size > 0 or iter == 600:
+            hit = True
+            # print("Hit position in: X={:.2f}\tY={:.2f}\tZ={:.2f}".format(predict[i[0], 0], predict[i[0], 1], predict[i[0], 2]) )
+            if i.size > 0:
+                predicted_hit_pos = predict[i[0], :]
+        else:
+            Itraj = np.vstack((Itraj, predict[0, :]))
+    error = np.mean(np.abs((Ttraj[0,1:2]-predicted_hit_pos[0:2])/Ttraj[0,1:2])*100)
+    print("Estimated target error: {:.2f}%".format(error))
+    return Itraj, predicted_hit_pos

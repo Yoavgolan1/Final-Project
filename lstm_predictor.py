@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 
 class LSTM_Predictor:
-    def __init__(self, n_steps_in, n_steps_out, n_hidden_1=200, n_hidden_2=200):
+    def __init__(self, n_steps_in, n_steps_out, n_hidden_1=300, n_hidden_2=300):
         self.n_steps_in = n_steps_in
         self.n_steps_out = n_steps_out
         self.n_features = 3  # Three coordinates in euclidean space
@@ -112,15 +112,3 @@ class LSTM_Predictor:
         y_output = self.model.predict(x_input, verbose=0)
 
         return y_output[0, :, :]
-
-#
-# my_lstm = LSTM_Predictor(3, 1)
-# my_lstm.train('input_trajectories.csv', epochs=300)
-#
-# # my_lstm.load('test_weights')
-# my_lstm.save('test_weights')
-#
-# input_block = np.array([[74.446, 529.7, -100.2279], [75.59, 537.863, -105.072], [76.737, 546.0126, -110.01804]])
-#
-# #next_guess = my_lstm.test(input_block)
-# #print(next_guess)
