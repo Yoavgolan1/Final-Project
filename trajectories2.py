@@ -38,9 +38,10 @@ def create_dataSet(n_trajectories = 100, dt = 0.1, time_interval=(0, 10), initia
         # ax.plot([target_estimated[0]], [target_estimated[1]], [target_estimated[2]], '.', color=color)
         plt.show()
 
-    with open('traj_1.csv', 'w', newline='') as csvFile:
+    with open('data_set_1.csv', 'w', newline='') as csvFile:
         writer = csv.writer(csvFile)
         writer.writerows(Itraj)
+
     print("Data set saved.")
 
 def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(0, 10),
