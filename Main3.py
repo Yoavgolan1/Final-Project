@@ -1,8 +1,6 @@
 import numpy as np
 import trajectories2 as trj
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
+import lstm_predictor as LSTM
 
 # Create training set
 n_trajectories = 100
@@ -16,3 +14,4 @@ trj.create_dataSet(n_trajectories = n_trajectories, dt = dt, time_interval=time_
                    initial_angleAL_interval=initial_angleAL_interval,
                    noise = 20, g=9.81, plot = False)
 
+my_lstm = LSTM.LSTM_Predictor(10,2)
