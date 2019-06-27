@@ -42,14 +42,15 @@ def create_trajectory(dt = 0.01, time_interval=(0, 10), initial_speed_interval=(
     y_traget = y0 + v0y * t_target
     z_target = 0
     target_POS = np.asarray([x_traget, y_traget, z_target])
-    traj_vec = np.asarray([trajectory_x, trajectory_y, trajectory_z]).reshape((1, n_timesteps * 3))
+    # traj_vec = np.asarray([trajectory_x, trajectory_y, trajectory_z]).reshape((1, n_timesteps * 3))
+    traj_vec = np.vstack((np.vstack((trajectory_x, trajectory_y)), trajectory_z)).T
     return traj_vec, target_POS
 
 def solver(dt, trajectory):
     n = int(len(trajectory)/3)
-    xtraj = trajectory[:n]
-    ytraj = trajectory[n:2*n]
-    ztraj = trajectory[2*n:]
+    xtraj = trajectory[:,0]
+    ytraj = trajectory[:,1]
+    ztraj = trajectory[:,2]
 
     t = np.arange(0, int((len(xtraj) - 1) * dt) + dt, dt)
     px = np.polyfit(t, xtraj, 1)
