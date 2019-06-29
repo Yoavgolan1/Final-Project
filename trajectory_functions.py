@@ -125,8 +125,12 @@ def my_plot(Itraj, Ttraj, predicted_traj, predicted_hit_pos, n_time_steps):
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    miss_distance = np.sqrt((Ttraj[0, 0] - predicted_hit_pos[0])**2 + (Ttraj[0, 1] - predicted_hit_pos[1])**2)
-    target_distance = np.sqrt(Ttraj[0, 0]**2 + Ttraj[0, 1]**2)
+    # miss_distance = np.sqrt((Ttraj[0, 0] - predicted_hit_pos[0])**2 + (Ttraj[0, 1] - predicted_hit_pos[1])**2)
+    # target_distance = np.sqrt(Ttraj[0, 0]**2 + Ttraj[0, 1]**2)
+
+    miss_distance = np.sqrt(np.sum((Ttraj[0, 0:2] - predicted_hit_pos[0:2]) ** 2 ))
+    target_distance = np.sqrt(np.sum(Ttraj[0, 0:2] ** 2))
+
     error = miss_distance / target_distance
     ax.set_title("Estimated target error: {:.2f}%".format(error*100))
     ax.legend(loc='center left', bbox_to_anchor=(0, 0.5))
