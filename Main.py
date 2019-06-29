@@ -61,6 +61,8 @@ def test_and_track(inout_size, Itraj, Ttraj):
     miss_distance = np.sqrt(np.sum((Ttraj[0, 0:2] - predicted_hit_pos[0:2]) ** 2))
     target_distance = np.sqrt(np.sum(Ttraj[0, 0:2] ** 2))
     error = miss_distance / target_distance
+
+    e = trj.error(Ttraj[0, :], predicted_hit_pos[:])
     print("Estimated target error: {:.2f}%".format(error*100))
     return Itraj, predicted_hit_pos
 

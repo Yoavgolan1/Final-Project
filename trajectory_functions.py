@@ -13,8 +13,6 @@ def create_dataSet(n_trajectories=100, dt=0.1, time_interval=(0, 10), initial_sp
     n_time_steps = int((time_interval[1] - time_interval[0]) / dt + 1)
     Itraj = np.zeros((n_time_steps, 3 * n_trajectories))
     Ttraj = np.zeros((3, 3 * n_trajectories))
-    RMS = np.zeros(n_trajectories)
-    ePos = np.zeros(n_trajectories)
     for ii in range(n_trajectories):
         Itraj[:, (ii * 3):(ii * 3 + 3)], Ttraj[0, (ii * 3):(ii * 3 + 3)] =\
             create_trajectory(dt=dt, time_interval=time_interval,
@@ -32,8 +30,6 @@ def create_dataSet(n_trajectories=100, dt=0.1, time_interval=(0, 10), initial_sp
         z_pos = Itraj[:, (ii*3)+2]
         color = np.random.rand(3)
         ax.plot(x_pos, y_pos, z_pos, '-', color = color, alpha = 1)
-        # ax.plot([Ttraj[ii,0]], [Ttraj[ii,1]], [Ttraj[ii,2]], 'x', color = color)
-        # ax.plot([target_estimated[0]], [target_estimated[1]], [target_estimated[2]], '.', color=color)
         plt.show()
 
     with open('data_set_1.csv', 'w', newline='') as csvFile:
@@ -109,9 +105,11 @@ def solver(dt, trajectory):
 def RMS(val1, val2):
     return np.sqrt(np.mean((val2 - val1)**2))
 
-
-def error(val1, val2):
-    return np.sqrt(np.sum((val1 - val2)**2))
+def error(real, estimated):
+    miss_distance = np.sqrt(np.sum((real[0:2] - estimated[0:2]) ** 2))
+    target_distance = np.sqrt(np.sum(real[0:2] ** 2))
+    error = miss_distance / target_distance
+    return error
 
 def my_plot(Itraj, Ttraj, predicted_traj, predicted_hit_pos, n_time_steps):
     fig = plt.figure()
@@ -128,11 +126,13 @@ def my_plot(Itraj, Ttraj, predicted_traj, predicted_hit_pos, n_time_steps):
     # miss_distance = np.sqrt((Ttraj[0, 0] - predicted_hit_pos[0])**2 + (Ttraj[0, 1] - predicted_hit_pos[1])**2)
     # target_distance = np.sqrt(Ttraj[0, 0]**2 + Ttraj[0, 1]**2)
 
-    miss_distance = np.sqrt(np.sum((Ttraj[0, 0:2] - predicted_hit_pos[0:2]) ** 2 ))
-    target_distance = np.sqrt(np.sum(Ttraj[0, 0:2] ** 2))
+    # miss_distance = np.sqrt(np.sum((Ttraj[0, 0:2] - predicted_hit_pos[0:2]) ** 2 ))
+    # target_distance = np.sqrt(np.sum(Ttraj[0, 0:2] ** 2))
+    # error = miss_distance / target_distance
 
-    error = miss_distance / target_distance
-    ax.set_title("Estimated target error: {:.2f}%".format(error*100))
+    e = error(Ttraj[0, :], predicted_hit_pos[:])
+
+    ax.set_title("Estimated target error: {:.2f}%".format(e*100))
     ax.legend(loc='center left', bbox_to_anchor=(0, 0.5))
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     ax.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
